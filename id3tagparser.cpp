@@ -7,30 +7,32 @@ ID3TagParser::ID3TagParser(Mode mode, bool getExtendedTags)
 {
 }
 
-bool ID3TagParser::getTag(const QString &fileName, Tag *tag, bool getExt) const
+//bool ID3TagParser::getTag(const QString &fileName, Tag *tag, bool getExt) const
+Tag ID3TagParser::getTag(const QString &fileName) const
 {
+    Tag tag;
     QFile file(fileName);
-    bool success = false;
+//    bool success = false;
     if (file.open(QIODevice::ReadOnly)) {
         if (m_mode == V1) {
-            success = getTagID3v1(file, tag);
+            getTagID3v1(file, &tag);
         } else if (m_mode == V2) {
-            success = getTagID3v2(file, tag, getExt);
+            getTagID3v2(file, &tag);
         }
         file.close();
     }
-    return success;
+    return tag;
 }
 
-bool ID3TagParser::getTagID3v1(QFile &file, Tag *tag) const
+void ID3TagParser::getTagID3v1(QFile &file, Tag *tag) const
 {
     int bufLen = 31;
     char* buf;
     QDataStream data(&file);
-    bool success = false;
+//    bool success = false;
 
     if (!file.seek(file.size()-128)) {
-        return false;
+        return;
     }
 
     buf = new char[bufLen]();
@@ -68,13 +70,13 @@ bool ID3TagParser::getTagID3v1(QFile &file, Tag *tag) const
         data.readRawData(buf, 1);
         tag->setGenre(buf[0]);
 
-        success = true;
+//        success = true;
     }
     delete buf;
-    return success;
+//    return success;
 }
 
-bool ID3TagParser::getTagID3v2(QFile &file, Tag *tag, bool getExt) const
+void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
 {
     QDataStream dataStream(&file);
     const unsigned int initBufSize = 10;
@@ -88,13 +90,14 @@ bool ID3TagParser::getTagID3v2(QFile &file, Tag *tag, bool getExt) const
 
     if (dataStream.readRawData(buf, 10) < 10) {
         delete buf;
-        return false;
+        return;
     }
 
     // make sure there's an ID3v2 tag else, default to ID3v1
     if (!(strncmp(buf, "ID3", 3) == 0)) {
         delete buf;
-        return getTagID3v1(file, tag);
+        getTagID3v1(file, tag);
+        return;
     }
 
     id3ver = buf[3];
@@ -102,7 +105,8 @@ bool ID3TagParser::getTagID3v2(QFile &file, Tag *tag, bool getExt) const
     // if version isn't right, then default to ID3v1
     if (id3ver < 0 || id3ver > 4) {
         delete buf;
-        return getTagID3v1(file, tag);
+        getTagID3v1(file, tag);
+        return;
     }
 
     tagSize = (((buf[9] & 0xFF) | ((buf[8] & 0xFF) << 7) | ((buf[7]) & 0xFF) << 14)|
@@ -124,7 +128,7 @@ bool ID3TagParser::getTagID3v2(QFile &file, Tag *tag, bool getExt) const
     buf = new char[tagSize];
     if (dataStream.readRawData(buf, tagSize) < 0) {
         delete buf;
-        return false;
+        return;
     }
 
     if (unsynched) {
@@ -184,7 +188,7 @@ bool ID3TagParser::getTagID3v2(QFile &file, Tag *tag, bool getExt) const
                 tag->setYear(parseFrameData(dataPos, frameSize).toInt());
             } else if (strncmp(frameName, "TCO", 3) == 0) {
                 tag->setGenre(parseFrameData(dataPos, frameSize));
-            } else if (getExt) {
+            } else if (m_getExt) {
                 tag->addExtendedData(frameName,
                                      parseFrameData(dataPos, frameSize));
             }
@@ -203,17 +207,13 @@ bool ID3TagParser::getTagID3v2(QFile &file, Tag *tag, bool getExt) const
                 tag->setYear(parseFrameData(dataPos, frameSize).toInt());
             } else if (strncmp(frameName, "TCON", 4) == 0) {
                 tag->setGenre(parseFrameData(dataPos, frameSize));
-            } else if (getExt) {
+            } else if (m_getExt) {
                 tag->addExtendedData(frameName,
                                      parseFrameData(dataPos, frameSize));
             }
         }
-
-
         pos += frameHeaderSize+frameSize;
-
     }
-    return true;
 }
 
 QString ID3TagParser::parseFrameData(char *buf, const quint8 size) const

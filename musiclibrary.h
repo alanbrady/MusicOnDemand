@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QList>
 #include <QPair>
+#include "id3tagparser.h"
 
 class MusicLibrary : public QObject {
     Q_OBJECT
@@ -39,6 +40,7 @@ private:
     QList<QPair<QString, quint16> > crcsToSave;
     unsigned int filesSaved;
     unsigned int filesTotal;
+    ID3TagParser parser;
 
     void checkDirectory(const QString& path);
     void initSql();

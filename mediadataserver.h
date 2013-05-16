@@ -3,7 +3,9 @@
 
 #include <QTcpServer>
 #include "mediasocketthread.h"
-#include "id3taginterface.h"
+//#include "id3taginterface.h"
+#include "tag.h"
+#include "id3tagparser.h"
 
 class MediaDataServer : public QTcpServer {
     Q_OBJECT
@@ -25,13 +27,14 @@ private slots:
 
 private:
     QTcpSocket* sock;
+    ID3TagParser parser;
 
     QByteArray getData(MESSAGE m, QString msg) const;
     QByteArray getLibraryLastModified() const;
     QByteArray getLibraryDatabase() const;
     QByteArray getAlbumArt(const QString& filePath) const;
     QByteArray getID3Tags(const QString& filePath) const;
-    QByteArray convertQTagsToBytes(const ID3TagInterface::QTags& tags) const;
+    QByteArray tagToBytes(Tag tag) const;
 };
 
 #endif // MEDIADATASERVER_H

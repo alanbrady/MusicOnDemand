@@ -18,13 +18,14 @@ public:
 
     ID3TagParser(Mode mode, bool getExtendedTags = false);
 
-    bool getTag(const QString& fileName, Tag* tag, bool getExt) const;
+//    bool getTag(const QString& fileName, Tag* tag, bool getExt) const;
+    Tag getTag(const QString& fileName) const;
 private:
     const Mode m_mode;
     const bool m_getExt;
 
-    bool getTagID3v1(QFile& file, Tag* tag) const;
-    bool getTagID3v2(QFile& file, Tag* tag, bool getExt) const;
+    void getTagID3v1(QFile& file, Tag* tag) const;
+    void getTagID3v2(QFile& file, Tag* tag) const;
 
     QString parseFrameData(char* buf, const quint8 size) const;
     quint8 getFrameDataSize(char* buf, char id3ver) const;

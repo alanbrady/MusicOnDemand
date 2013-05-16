@@ -11,7 +11,7 @@
 #include <QDebug>
 
 MediaDataServer::MediaDataServer(QObject *parent)
-    : QTcpServer(parent)
+    : QTcpServer(parent), parser(ID3TagParser::V2, false)
 {
 }
 
@@ -96,23 +96,34 @@ QByteArray MediaDataServer::getAlbumArt(const QString &filePath) const {
 }
 
 QByteArray MediaDataServer::getID3Tags(const QString &filePath) const {
-    return convertQTagsToBytes(ID3TagInterface::getTags(filePath.toUtf8()));
+//    return tagToBytes(ID3TagInterface::getTags(filePath.toUtf8()));
+    Tag tag = parser.getTag(filePath);
+    if (tag.isValid())
+        return tagToBytes(tag);
+    else
+        return "NULL";
 }
 
-QByteArray MediaDataServer::convertQTagsToBytes(const ID3TagInterface::QTags &tags) const {
+QByteArray MediaDataServer::tagToBytes(Tag tag) const {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_4_0);
-    QString tagsStr;
+    out.setVersion(QDataStream::Qt_5_0);
+    QString tagStr;
 
-    for (int i = 0; i < tags.size(); i++) {
-        tagsStr += tags.at(i).first;
-        tagsStr += " | ";
-        tagsStr += tags.at(i).second;
-        tagsStr += "\n";
-    }
-    tagsStr.chop(1);
-    out.writeRawData(tagsStr.toUtf8(), tagsStr.size());
+//    for (int i = 0; i < tag.size(); i++) {
+//        tagsStr += tag.at(i).first;
+//        tagsStr += " | ";
+//        tagsStr += tag.at(i).second;
+//        tagsStr += "\n";
+//    }
+//    tagsStr.chop(1);
+
+    tagStr += "Artist | " + tag.getArtist() + "\n";
+    tagStr += "Album | " + tag.getAlbum() + "\n";
+    tagStr += "Title | " + tag.getTitle() + "\n";
+    tagStr += "Track | " + tag.getTrack();
+
+    out.writeRawData(tagStr.toUtf8(), tagStr.size());
     return data;
 }
 

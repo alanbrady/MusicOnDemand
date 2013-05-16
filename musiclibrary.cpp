@@ -17,13 +17,18 @@ const int MusicLibrary::MAX_FILES =         1000;
 
 
 MusicLibrary::MusicLibrary(QObject* parent)
-    : QObject(parent), crcDbConnName("CRC_DB_CONN"), libraryDbConnName("LIB_DB_CONN")
+    : QObject(parent),
+      crcDbConnName("CRC_DB_CONN"), libraryDbConnName("LIB_DB_CONN"),
+      parser(ID3TagParser::V2, false)
 {
     initSql();
 }
 
 MusicLibrary::MusicLibrary(const char *crcDatabaseConnection, const char *libraryDatabaseConnection, QObject* parent)
-    : QObject(parent), crcDbConnName(crcDatabaseConnection), libraryDbConnName(libraryDatabaseConnection)
+    : QObject(parent),
+      crcDbConnName(crcDatabaseConnection),
+      libraryDbConnName(libraryDatabaseConnection),
+      parser(ID3TagParser::V2, false)
 {
     initSql();
 }
@@ -277,36 +282,53 @@ void MusicLibrary::saveCRCs(const QList<QPair<QString, quint16> > &crcs) {
 }
 
 void MusicLibrary::saveSong(const QString& path) {
-    ID3TagInterface::QTagMap tags = ID3TagInterface::getTagMap(path.toUtf8());
+//    ID3TagInterface::QTagMap tags = ID3TagInterface::getTagMap(path.toUtf8());
+    Tag tag = parser.getTag(path);
     QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
     QFileInfo fi(path);
-    query.prepare("INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, artist, album, track, tracknum, date) VALUES(:filePath, :fileSize, :artist, :album, :track, :tracknum, :date)");
+    QString queryStr = "";
+    queryStr += "INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, ";
+    queryStr += "artist, album, track, tracknum, date) VALUES(:filePath, ";
+    queryStr += ":fileSize, :artist, :album, :title, :track, :date)";
+//    query.prepare("INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, " +
+//                  "artist, album, track, tracknum, date) VALUES(:filePath, " +
+//                  ":fileSize, :artist, :album, :title, :track, :date)");
+    query.prepare(queryStr);
     query.bindValue(":filePath", fi.canonicalFilePath());
     query.bindValue(":fileSize", fi.size());
-    query.bindValue(":artist", tags.value("Artist"));
-    query.bindValue(":album", tags.value("Album"));
-    query.bindValue(":track", tags.value("Track"));
-    query.bindValue(":tracknum", tags.value("TrackNum"));
+//    query.bindValue(":artist", tags.value("Artist"));
+    query.bindValue(":artist", tag.getArtist());
+    query.bindValue(":album", tag.getAlbum());
+    query.bindValue(":title", tag.getTitle());
+    query.bindValue(":track", tag.getTrack());
     query.bindValue(":date", QDateTime::currentMSecsSinceEpoch());
     query.exec();
 
 }
 
 void MusicLibrary::saveSongs(const QStringList& files) {
-    ID3TagInterface::QTagMap tags;
+//    ID3TagInterface::QTagMap tags;
+    Tag tag;
     QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
-    QString stmt("INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, artist, album, track, tracknum, date) VALUES('%1', %2, '%3', '%4', '%5', %6, %7)");
+    QString stmt = "";
+    stmt += "INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, artist, ";
+    stmt += "album, title, track, date) VALUES('%1', %2, '%3', '%4', '%5', %6, %7)";
     query.exec("BEGIN;");
     for (int i = 0; i < files.size(); i++) {
         filesSaved++;
 //        emit statusUpdate(QString("(%1 of %2)Saving song: %3").arg(filesSaved).arg(filesTotal).arg(files.at(i)));
-        tags = ID3TagInterface::getTagMap(files.at(i));
+//        tags = ID3TagInterface::getTagMap(files.at(i));
+        tag = parser.getTag(files.at(i));
         query.exec(stmt.arg(files.at(i))
                    .arg(QFile(files.at(i)).size())
-                   .arg(tags.value("Artist"))
-                   .arg(tags.value("Album"))
-                   .arg(tags.value("Track"))
-                   .arg(tags.value("TrackNum"))
+//                   .arg(tags.value("Artist"))
+                   .arg(tag.getArtist())
+//                   .arg(tags.value("Album"))
+                   .arg(tag.getAlbum())
+//                   .arg(tags.value("Track"))
+                   .arg(tag.getTitle())
+//                   .arg(tags.value("TrackNum"))
+                   .arg(tag.getTrack())
                    .arg(QDateTime::currentMSecsSinceEpoch())
                    );
     }
