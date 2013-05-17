@@ -218,16 +218,18 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
 
 QString ID3TagParser::parseFrameData(char *buf, const quint8 size) const
 {
-    char* data = new char[size];
+//    char* data = new char[size];
     QString str;
-    memcpy(data, buf, size);
-    char textEncoding = data[0] & 0xFF;
-    if (textEncoding == 0) {
-        str = QString::fromLocal8Bit(data+1, size-1);
-    } else if (textEncoding == 1) {
-        str = QString::fromUtf16((ushort*)(data+1), size-1);
+//    memcpy(data, buf, size);
+    char textEncoding = buf[0] & 0xFF;
+    if (textEncoding == 1) {
+        str = QString::fromUtf16((ushort*)(buf+1), size-1);
+    } else if (textEncoding == 0){
+        str = QString::fromLocal8Bit(buf+1, size-1);
+    } else if (textEncoding == 3) {
+        str = QString::fromLocal8Bit(buf+1, size-2);
     }
-    delete data;
+//    delete data;
     return str;
 }
 

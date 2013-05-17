@@ -191,7 +191,7 @@ void MusicLibrary::initSql() {
     db.setDatabaseName(LIBRARYPATH);
     db.open();
     this->createTable(db, "LibraryTable",
-                      "filePath TEXT PRIMARY KEY, fileSize INTEGER, artist TEXT, album TEXT, track TEXT, tracknum INTEGER, date INTEGER");
+                      "filePath TEXT PRIMARY KEY, fileSize INTEGER, artist TEXT, album TEXT, title TEXT, track INTEGER, date INTEGER");
 
     db = QSqlDatabase::addDatabase("QSQLITE", crcDbConnName);
     db.setDatabaseName(CRCDBPATH);
