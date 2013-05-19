@@ -55,7 +55,6 @@ void MusicLibrary::checkUserDirectories(){
     saveSongs(filesToUpdate);
     filesToUpdate.clear();
     emit statusUpdate("Library update complete");
-//    qDebug() << "Files saved: " << filesSaved << " Files found: " << filesTotal;
     emit statusUpdate(QString("Update complete. Files updated: %1").arg(filesSaved));
 }
 
@@ -149,6 +148,7 @@ bool MusicLibrary::compareCRC(const QString& path, quint16 crc){
 }
 
 void MusicLibrary::catalogDirectory(const QString &dir, const quint16 crc, bool recursive){
+    // TODO - recursive option needs to be implemented
     crcsToSave.append(qMakePair<QString, quint16>(dir, crc));
     if (crcsToSave.size() > MAX_CRCS) {
         saveCRCs(crcsToSave);
@@ -175,7 +175,7 @@ void MusicLibrary::checkFile(const QString &path) {
 void MusicLibrary::checkFiles(const QFileInfoList &files) {
     for (int i = 0; i < files.size(); i++) {
         checkFile(files.at(i).canonicalFilePath());
-        qDebug() << QFile::encodeName(files.at(i).canonicalFilePath().toUtf8());
+//        qDebug() << QFile::encodeName(files.at(i).canonicalFilePath().toUtf8());
     }
     if (filesToUpdate.size() > MAX_FILES) {
         saveSongs(filesToUpdate);
@@ -282,7 +282,8 @@ void MusicLibrary::saveCRCs(const QList<QPair<QString, quint16> > &crcs) {
 }
 
 void MusicLibrary::saveSong(const QString& path) {
-//    ID3TagInterface::QTagMap tags = ID3TagInterface::getTagMap(path.toUtf8());
+    // TODO - inputs need some kind of sanitization
+
     Tag tag = parser.getTag(path);
     QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
     QFileInfo fi(path);
@@ -290,13 +291,9 @@ void MusicLibrary::saveSong(const QString& path) {
     queryStr += "INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, ";
     queryStr += "artist, album, track, tracknum, date) VALUES(:filePath, ";
     queryStr += ":fileSize, :artist, :album, :title, :track, :date)";
-//    query.prepare("INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, " +
-//                  "artist, album, track, tracknum, date) VALUES(:filePath, " +
-//                  ":fileSize, :artist, :album, :title, :track, :date)");
     query.prepare(queryStr);
     query.bindValue(":filePath", fi.canonicalFilePath());
     query.bindValue(":fileSize", fi.size());
-//    query.bindValue(":artist", tags.value("Artist"));
     query.bindValue(":artist", tag.getArtist());
     query.bindValue(":album", tag.getAlbum());
     query.bindValue(":title", tag.getTitle());
@@ -307,30 +304,32 @@ void MusicLibrary::saveSong(const QString& path) {
 }
 
 void MusicLibrary::saveSongs(const QStringList& files) {
-//    ID3TagInterface::QTagMap tags;
+    // TODO - inputs should probably go through some sanitization for both
+    // security and avoiding weird bugs if a file has some unusual naming
+
+    // TODO - I'm not convinced .arg-ing the statment string is the most
+    // effecient way to process input strings.  Manually constructing the
+    // statement strings with a += is probably better.
+
     Tag tag;
     QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
     QString stmt = "";
+    QString temp = "";
     stmt += "INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, artist, ";
-    stmt += "album, title, track, date) VALUES('%1', %2, '%3', '%4', '%5', %6, %7)";
+    stmt += "album, title, track, date) VALUES(\"%1\", %2, \"%3\", \"%4\", \"%5\", %6, %7)";
     query.exec("BEGIN;");
     for (int i = 0; i < files.size(); i++) {
         filesSaved++;
-//        emit statusUpdate(QString("(%1 of %2)Saving song: %3").arg(filesSaved).arg(filesTotal).arg(files.at(i)));
-//        tags = ID3TagInterface::getTagMap(files.at(i));
         tag = parser.getTag(files.at(i));
-        query.exec(stmt.arg(files.at(i))
+        temp = stmt.arg(files.at(i))
                    .arg(QFile(files.at(i)).size())
-//                   .arg(tags.value("Artist"))
                    .arg(tag.getArtist())
-//                   .arg(tags.value("Album"))
                    .arg(tag.getAlbum())
-//                   .arg(tags.value("Track"))
                    .arg(tag.getTitle())
-//                   .arg(tags.value("TrackNum"))
                    .arg(tag.getTrack())
-                   .arg(QDateTime::currentMSecsSinceEpoch())
-                   );
+                   .arg(QDateTime::currentMSecsSinceEpoch());
+//        qDebug() << temp;
+        query.exec(temp);
     }
     query.exec("END;");
 }
