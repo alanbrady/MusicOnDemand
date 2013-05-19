@@ -12,7 +12,6 @@ Tag ID3TagParser::getTag(const QString &fileName) const
 {
     Tag tag;
     QFile file(fileName);
-//    bool success = false;
     if (file.open(QIODevice::ReadOnly)) {
         if (m_mode == V1) {
             getTagID3v1(file, &tag);
@@ -29,9 +28,9 @@ void ID3TagParser::getTagID3v1(QFile &file, Tag *tag) const
     int bufLen = 31;
     char* buf;
     QDataStream data(&file);
-//    bool success = false;
 
     if (!file.seek(file.size()-128)) {
+        qDebug() << "Error: unable to parse tag";
         return;
     }
 
@@ -70,10 +69,8 @@ void ID3TagParser::getTagID3v1(QFile &file, Tag *tag) const
         data.readRawData(buf, 1);
         tag->setGenre(buf[0]);
 
-//        success = true;
     }
     delete buf;
-//    return success;
 }
 
 void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
@@ -96,6 +93,7 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
     // make sure there's an ID3v2 tag else, default to ID3v1
     if (!(strncmp(buf, "ID3", 3) == 0)) {
         delete buf;
+//        qDebug() << "Error: no ID3v2 tag, reverting to v1";
         getTagID3v1(file, tag);
         return;
     }
@@ -135,8 +133,8 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
         int newPos = 0;
         char* temp = new char[tagSize];
 
-        // unsynching add a 0x00 after every 0xFF
-        // this supposedly removes the extra 0x00
+        // unsynching add a 0x00 after every 0xFF to prevent MP3 synching
+        // this code removes the extra 0x00
         for (int i = 0; i < tagSize; i++) {
             if (i < tagSize-1 && (buf[i] & 0xFF) == 0xFF && buf[i+1] == 0) {
                 temp[newPos++] = 0xFF;
@@ -218,24 +216,25 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
 
 QString ID3TagParser::parseFrameData(char *buf, const quint8 size) const
 {
-//    char* data = new char[size];
     QString str;
-//    memcpy(data, buf, size);
     char textEncoding = buf[0] & 0xFF;
     if (textEncoding == 1) {
         str = QString::fromUtf16((ushort*)(buf+1), size-1);
     } else if (textEncoding == 0){
         str = QString::fromLocal8Bit(buf+1, size-1);
     } else if (textEncoding == 3) {
+        // haven't figured out what text encoding 3 might be but it has an
+        // extra byte on the end for some reason
         str = QString::fromLocal8Bit(buf+1, size-2);
     }
-//    delete data;
     return str;
 }
 
 quint8 ID3TagParser::getFrameDataSize(char *buf, char id3ver) const
 {
     quint8 size;
+
+    // size integer must be unsynched
 
     if (id3ver < 3) {
         size = (buf[2] & 0xFF) | ((buf[1] & 0xFF) << 8) |
