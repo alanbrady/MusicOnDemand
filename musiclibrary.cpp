@@ -162,7 +162,9 @@ void MusicLibrary::catalogDirectory(const QString &dir, const quint16 crc, bool 
     }
 
     QStringList nameFilters;
-    nameFilters << "*.mp3" << "*.ogg" << "*.flac" << "*.wav";
+//    nameFilters << "*.mp3" << "*.ogg" << "*.flac" << "*.wav";
+    // disabled all but mp3 until ID3 tagging has been updated
+    nameFilters << "*.mp3";
     QFileInfoList files = d.entryInfoList(nameFilters, QDir::Files);
     checkFiles(files);
 }
@@ -285,6 +287,10 @@ void MusicLibrary::saveSong(const QString& path) {
     // TODO - inputs need some kind of sanitization
 
     Tag tag = parser.getTag(path);
+    if (!tag.isValid()) {
+        qDebug() << "Invalid tag: " << path;
+        return;
+    }
     QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
     QFileInfo fi(path);
     QString queryStr = "";
@@ -321,6 +327,10 @@ void MusicLibrary::saveSongs(const QStringList& files) {
     for (int i = 0; i < files.size(); i++) {
         filesSaved++;
         tag = parser.getTag(files.at(i));
+        if (!tag.isValid()) {
+            qDebug() << "Invalid tag: " << files.at(i);
+            continue;
+        }
         temp = stmt.arg(files.at(i))
                    .arg(QFile(files.at(i)).size())
                    .arg(tag.getArtist())
