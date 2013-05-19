@@ -166,8 +166,10 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
 
     for (int pos = 0; pos < tagSize;) {
         memcpy(frameName, buf+pos, frameNameSize);
-        const quint8 frameSize = getFrameDataSize(buf+(pos+frameNameSize),
+        const unsigned int frameSize = getFrameDataSize(buf+(pos+frameNameSize),
                                                   id3ver);
+
+        if (frameSize == 0) return;
 
         char* dataPos = buf+frameHeaderSize+pos;
 
@@ -191,7 +193,10 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
                                      parseFrameData(dataPos, frameSize));
             }
         } else {
-            if (strncmp(frameName, "TIT2", 4) == 0) {
+            // no support for user defined text frames
+            if (strncmp(frameName, "TXXX", 4) == 0) {
+                // Do nothing
+            } else if (strncmp(frameName, "TIT2", 4) == 0) {
                 tag->setTitle(parseFrameData(dataPos, frameSize));
             } else if (strncmp(frameName, "TALB", 4) == 0) {
                 tag->setAlbum(parseFrameData(dataPos, frameSize));
@@ -230,9 +235,9 @@ QString ID3TagParser::parseFrameData(char *buf, const quint8 size) const
     return str;
 }
 
-quint8 ID3TagParser::getFrameDataSize(char *buf, char id3ver) const
+unsigned int ID3TagParser::getFrameDataSize(char *buf, char id3ver) const
 {
-    quint8 size;
+    unsigned int size = 0x0;
 
     // size integer must be unsynched
 
@@ -241,6 +246,15 @@ quint8 ID3TagParser::getFrameDataSize(char *buf, char id3ver) const
                 ((buf[0] & 0xFF) << 16);
     }
     else if (id3ver < 4) {
+//        unsigned int a = 0x0, b = 0x0, c = 0x0, d = 0x0;
+//        a = buf[3] & 0xFF;
+//        b = buf[2] & 0xFF;
+//        c = buf[1] & 0xFF;
+//        d = buf[0] & 0xFF;
+//        size = size | a;
+//        size = size | (b << 8);
+//        size = size | (c << 16);
+//        size = size | (d << 24);
         size = (buf[3] & 0xFF) | ((buf[2] & 0xFF) << 8) |
                 ((buf[1] & 0xFF) << 16) | ((buf[0] & 0xFF) << 24);
     } else {

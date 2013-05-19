@@ -28,7 +28,7 @@ private:
     void getTagID3v2(QFile& file, Tag* tag) const;
 
     QString parseFrameData(char* buf, const quint8 size) const;
-    quint8 getFrameDataSize(char* buf, char id3ver) const;
+    unsigned int getFrameDataSize(char* buf, char id3ver) const;
     unsigned char parseTrack(const QString& str) const;
 
 };
