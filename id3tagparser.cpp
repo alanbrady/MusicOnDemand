@@ -1,6 +1,8 @@
 #include "id3tagparser.h"
 
 #include <QDebug>
+#include <QChar>
+#include <QDataStream>
 
 ID3TagParser::ID3TagParser(Mode mode, bool getExtendedTags)
     : m_mode(mode), m_getExt(getExtendedTags)
@@ -129,6 +131,8 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
         return;
     }
 
+    // don't synch if id3ver is 2.4 or greater because each frame contains
+    // a specific unsynch flag and messes with frame sizes
     if (unsynched && id3ver < 4) {
         int newPos = 0;
         char* temp = new char[tagSize];
@@ -166,8 +170,10 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
 
     for (unsigned int pos = 0; pos < tagSize;) {
         memcpy(frameName, buf+pos, frameNameSize);
-        const unsigned int frameSize = getFrameDataSize(buf+(pos+frameNameSize),
-                                                  id3ver);
+        unsigned int frameSize;
+        // TODO - it would be nice if this somehow could check if it's
+        // unsynched or not...
+        frameSize = getFrameDataSize(buf+(pos+frameNameSize), id3ver);
 
         if (frameSize == 0) return;
 
@@ -219,7 +225,7 @@ void ID3TagParser::getTagID3v2(QFile &file, Tag *tag) const
     }
 }
 
-QString ID3TagParser::parseFrameData(char *buf, const quint8 size) const
+QString ID3TagParser::parseFrameData(char *buf, const unsigned int size) const
 {
     // TODO - further examination of $01 and $02 encoding is needed
     // TODO - ID3v2.4 contains a frame specific unsynch bit
@@ -230,8 +236,20 @@ QString ID3TagParser::parseFrameData(char *buf, const quint8 size) const
         // $00 no encoding
         str = QString::fromLocal8Bit(buf+1, size-1);
     } else if (textEncoding == 1){
-        // $00 UTF-16 encoded
-        str = QString::fromUtf16((ushort*)(buf+1), size-1);
+        // $01 UTF-16 encoded
+        if (buf+size-2 == 0 && buf+size-1 == 0)
+            str = QString::fromUtf16((ushort*)(buf+1), size-1);
+        else {
+            QByteArray temp;
+            QDataStream dataStream(&temp, QIODevice::ReadWrite);
+            dataStream.writeRawData(buf+1, size-1);
+            dataStream << 0x0000;
+            str = QString::fromUtf16((ushort*)temp.data());
+        }
+//        str = QString(QByteArray(buf+1), size-1);
+//        str = QString(QByteArray::fromRawData(buf+1, size-1));
+//        str = QString::fromRawData(buf+1, size-1);
+//        str = QString::fromUtf8(buf+1, size-1);
     } else if (textEncoding == 3) {
         // $03 is UTF-8 encoded terminated with a $00
         str = QString::fromUtf8(buf+1, size-2);
