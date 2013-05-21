@@ -3,6 +3,7 @@
 
 #include "id3taginterface.h"
 #include <QDebug>
+#include <QSqlQuery>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +17,25 @@ MainWindow::MainWindow(QWidget *parent) :
     server.start();
 
     mlDial = new ManageLibraryDialog(this);
+    const char* artistConn = "artistConnection";
+    const char* albumConn = "albumConnection";
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", artistConn);
+    db.setDatabaseName(MusicLibrary::LIBRARYPATH);
+    db.open();
+
+    artistQuery = new QSqlQueryModel(this);
+    QSqlQuery query("SELECT DISTINCT artist FROM LibraryTable", db);
+    artistQuery->setQuery(query);
+    ui->artistList->setModel(artistQuery);
+
+    db = QSqlDatabase::addDatabase("QSQLITE", albumConn);
+    db.setDatabaseName(MusicLibrary::LIBRARYPATH);
+    db.open();
+
+    albumQuery = new QSqlQueryModel(this);
+    query = QSqlQuery("SELECT DISTINCT album FROM LibraryTable", db);
+    albumQuery->setQuery(query);
+    ui->albumList->setModel(albumQuery);
 
     connect(ui->updateButton, SIGNAL(clicked()), &libraryThread, SLOT(checkDirectories()));
     connect(&libraryThread, SIGNAL(statusUpdate(QString)), statusLabel, SLOT(setText(QString)));

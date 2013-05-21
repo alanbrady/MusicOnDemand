@@ -311,7 +311,7 @@ void MusicLibrary::saveSong(const QString& path) {
 
 void MusicLibrary::saveSongs(const QStringList& files) {
     // TODO - inputs should probably go through some sanitization for both
-    // security and avoiding weird bugs if a file has some unusual naming
+    // security and avoiding weird bugs if a file has some odd chars
 
     // TODO - I'm not convinced .arg-ing the statment string is the most
     // effecient way to process input strings.  Manually constructing the

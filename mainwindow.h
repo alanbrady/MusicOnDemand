@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QSqlQueryModel>
 #include "socketinterface.h"
 #include "musiclibrarythread.h"
 #include "managelibrarydialog.h"
@@ -27,6 +28,8 @@ private:
     SocketInterface server;
     MusicLibraryThread libraryThread;
     ManageLibraryDialog* mlDial;
+    QSqlQueryModel* artistQuery;
+    QSqlQueryModel* albumQuery;
 
     QLabel* statusLabel;
 //    MediaDataServer mediaServer;

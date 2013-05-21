@@ -9,7 +9,6 @@ ID3TagParser::ID3TagParser(Mode mode, bool getExtendedTags)
 {
 }
 
-//bool ID3TagParser::getTag(const QString &fileName, Tag *tag, bool getExt) const
 Tag ID3TagParser::getTag(const QString &fileName) const
 {
     Tag tag;
@@ -246,10 +245,6 @@ QString ID3TagParser::parseFrameData(char *buf, const unsigned int size) const
             dataStream << 0x0000;
             str = QString::fromUtf16((ushort*)temp.data());
         }
-//        str = QString(QByteArray(buf+1), size-1);
-//        str = QString(QByteArray::fromRawData(buf+1, size-1));
-//        str = QString::fromRawData(buf+1, size-1);
-//        str = QString::fromUtf8(buf+1, size-1);
     } else if (textEncoding == 3) {
         // $03 is UTF-8 encoded terminated with a $00
         str = QString::fromUtf8(buf+1, size-2);
@@ -266,15 +261,6 @@ unsigned int ID3TagParser::getFrameDataSize(char *buf, char id3ver) const
                 ((buf[0] & 0xFF) << 16);
     }
     else if (id3ver < 4) {
-//        unsigned int a = 0x0, b = 0x0, c = 0x0, d = 0x0;
-//        a = buf[3] & 0xFF;
-//        b = buf[2] & 0xFF;
-//        c = buf[1] & 0xFF;
-//        d = buf[0] & 0xFF;
-//        size = size | a;
-//        size = size | (b << 8);
-//        size = size | (c << 16);
-//        size = size | (d << 24);
         size = (buf[3] & 0xFF) | ((buf[2] & 0xFF) << 8) |
                 ((buf[1] & 0xFF) << 16) | ((buf[0] & 0xFF) << 24);
     } else {

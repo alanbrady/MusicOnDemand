@@ -19,6 +19,7 @@ public:
     static const int        MAX_CRCS;
     static const int        MAX_FILES;
 
+
     explicit MusicLibrary(QObject* parent = 0);
     MusicLibrary(const char* crcDatabaseConnection, const char* libraryDatabaseConnection, QObject* parent = 0);
     ~MusicLibrary();
@@ -27,6 +28,8 @@ public:
     void removeDirectory(const QString& dir);
     void checkUserDirectories();
 
+    const char* getLibraryConnName() const { return libraryDbConnName; }
+    const char* getCrcConnName() const { return crcDbConnName; }
 
 signals:
     void statusUpdate(const QString& newStatus);
