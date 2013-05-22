@@ -30,11 +30,19 @@ private:
     ManageLibraryDialog* mlDial;
     QSqlQueryModel* artistQuery;
     QSqlQueryModel* albumQuery;
+    QSqlQueryModel* songQuery;
+
+    static const char* artistConn;
+    static const char* albumConn;
+    static const char* songConn;
+
 
     QLabel* statusLabel;
 //    MediaDataServer mediaServer;
 //    AudioDataServer audioServer;
 
+    void setAlbumListArist(const QString& artist);
+    void setSongListAlbumArtist(const QString& artist, const QString& album = "*");
 };
 
 #endif // MAINWINDOW_H
