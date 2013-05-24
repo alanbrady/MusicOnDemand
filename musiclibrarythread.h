@@ -19,6 +19,7 @@ signals:
     void statusUpdate(const QString& newStatus);
     void directoryAdded();
     void directoryRemoved();
+    void updateComplete();
 
 public slots:
     void checkDirectories();

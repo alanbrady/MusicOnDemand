@@ -23,6 +23,7 @@ void MusicLibraryThread::slotStatusUpdate(const QString &newStatus) {
 
 void MusicLibraryThread::checkDirectories() {
     library->checkUserDirectories();
+    emit updateComplete();
 }
 
 void MusicLibraryThread::addDirectory(const QString &path) {

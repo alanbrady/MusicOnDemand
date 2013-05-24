@@ -247,7 +247,8 @@ QString ID3TagParser::parseFrameData(char *buf, const unsigned int size) const
         }
     } else if (textEncoding == 3) {
         // $03 is UTF-8 encoded terminated with a $00
-        str = QString::fromUtf8(buf+1, size-2);
+        str = QString::fromUtf8(buf+1, size-1);
+        str = str.trimmed();
     }
     return str;
 }

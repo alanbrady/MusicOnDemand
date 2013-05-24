@@ -83,6 +83,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->albumList, SIGNAL(clicked(QModelIndex)),
             this, SLOT(albumListClicked(QModelIndex)));
 
+    connect(&libraryThread, SIGNAL(updateComplete()),
+            this, SLOT(libraryUpdateComplete()));
+
 }
 
 MainWindow::~MainWindow()
@@ -111,6 +114,11 @@ void MainWindow::albumListClicked(const QModelIndex &index)
     QString album = albumQuery->data(index).toString();
     selectedAlbum = album;
     setSongListAlbumArtist(selectedArtist, album);
+}
+
+void MainWindow::libraryUpdateComplete()
+{
+    resetQueries();
 }
 
 void MainWindow::setAlbumListArist(const QString &artist)
@@ -144,6 +152,16 @@ void MainWindow::setSongListAlbumArtist(const QString &artist, const QString &al
 
     QSqlQuery query(queryStr, QSqlDatabase::database(ARTISTCONN));
     songQuery->setQuery(query);
+}
+
+void MainWindow::resetQueries()
+{
+    QSqlQuery query("SELECT DISTINCT artist FROM LibraryTable",
+                    QSqlDatabase::database(ARTISTCONN));
+    artistQuery->setQuery(query);
+
+    setAlbumListArist(selectedArtist);
+    setSongListAlbumArtist(selectedArtist, selectedAlbum);
 }
 
 

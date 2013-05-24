@@ -26,6 +26,7 @@ public:
 public slots:
     void artistListClicked(const QModelIndex& index);
     void albumListClicked(const QModelIndex& index);
+    void libraryUpdateComplete();
 
 private:
     static const char* ARTISTCONN;
@@ -46,6 +47,7 @@ private:
 
     void setAlbumListArist(const QString& artist);
     void setSongListAlbumArtist(const QString& artist, const QString& album);
+    void resetQueries();
 
 //    MediaDataServer mediaServer;
 //    AudioDataServer audioServer;
