@@ -23,7 +23,15 @@ public:
 //    void addDirectory(const QString& path);
 //    void removeDirectory(const QString& path);
 
+public slots:
+    void artistListClicked(const QModelIndex& index);
+    void albumListClicked(const QModelIndex& index);
+
 private:
+    static const char* ARTISTCONN;
+    static const char* ALBUMCONN;
+    static const char* SONGCONN;
+
     Ui::MainWindow *ui;
     SocketInterface server;
     MusicLibraryThread libraryThread;
@@ -31,18 +39,17 @@ private:
     QSqlQueryModel* artistQuery;
     QSqlQueryModel* albumQuery;
     QSqlQueryModel* songQuery;
-
-    static const char* artistConn;
-    static const char* albumConn;
-    static const char* songConn;
-
-
     QLabel* statusLabel;
+
+    QString selectedArtist;
+    QString selectedAlbum;
+
+    void setAlbumListArist(const QString& artist);
+    void setSongListAlbumArtist(const QString& artist, const QString& album);
+
 //    MediaDataServer mediaServer;
 //    AudioDataServer audioServer;
 
-    void setAlbumListArist(const QString& artist);
-    void setSongListAlbumArtist(const QString& artist, const QString& album = "*");
 };
 
 #endif // MAINWINDOW_H
