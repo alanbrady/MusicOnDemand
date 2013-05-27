@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QLabel>
 #include <QSqlQueryModel>
+#include <QSqlTableModel>
 #include "socketinterface.h"
 #include "musiclibrarythread.h"
 #include "managelibrarydialog.h"
@@ -39,7 +40,7 @@ private:
     ManageLibraryDialog* mlDial;
     QSqlQueryModel* artistQuery;
     QSqlQueryModel* albumQuery;
-    QSqlQueryModel* songQuery;
+    QSqlTableModel* songTableModel;
     QLabel* statusLabel;
 
     QString selectedArtist;

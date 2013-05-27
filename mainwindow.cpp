@@ -1,9 +1,9 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-
-#include "id3taginterface.h"
 #include <QDebug>
 #include <QSqlQuery>
+#include <QHeaderView>
+#include "ui_mainwindow.h"
+#include "id3taginterface.h"
 
 const char* MainWindow::ARTISTCONN = "artistConnection";
 const char* MainWindow::ALBUMCONN = "albumConnection";
@@ -42,20 +42,36 @@ MainWindow::MainWindow(QWidget *parent) :
     albumQuery->setQuery(query);
     ui->albumList->setModel(albumQuery);
 
-    // songQuery setup
+    // songTableModel setup
     db = QSqlDatabase::addDatabase("QSQLITE", SONGCONN);
     db.setDatabaseName(MusicLibrary::LIBRARYPATH);
     db.open();
 
-    songQuery = new QSqlQueryModel(this);
-    query = QSqlQuery("SELECT * FROM LibraryTable", db);
-    songQuery->setQuery(query);
-    ui->songView->setModel(songQuery);
+    songTableModel = new QSqlTableModel(this, db);
+    songTableModel->setTable("LibraryTable");
+    songTableModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    songTableModel->select();
+    songTableModel->removeColumns(0, 2);
+    songTableModel->removeColumn(4);
+    songTableModel->setHeaderData(0, Qt::Horizontal, "Artist");
+    songTableModel->setHeaderData(1, Qt::Horizontal, "Album");
+    songTableModel->setHeaderData(2, Qt::Horizontal, "Title");
+    songTableModel->setHeaderData(3, Qt::Horizontal, "Track");
+    ui->songView->setModel(songTableModel);
+
+    // enable sorting
+    QHeaderView* header = ui->songView->horizontalHeader();
+    header->setSortIndicator(2, Qt::AscendingOrder);
+    header->setSectionsMovable(true);
+    header->setSortIndicatorShown(true);
+    header->setSectionsClickable(true);
+    header->setStretchLastSection(true);
+    ui->songView->setSortingEnabled(true);
 
     selectedArtist = "";
     selectedAlbum = "";
 
-    // connections
+    // signal/slot connections
     connect(ui->updateButton, SIGNAL(clicked()),
             &libraryThread, SLOT(checkDirectories()));
 
@@ -138,28 +154,26 @@ void MainWindow::setAlbumListArist(const QString &artist)
 
 void MainWindow::setSongListAlbumArtist(const QString &artist, const QString &album)
 {
-    QString queryStr = "";
+    QString filterStr = "";
     if (artist == "" && album == "") {
-        queryStr = "SELECT * FROM LibraryTable";
+        filterStr = "";
     } else if (album == "") {
-        queryStr = "SELECT * FROM LibraryTable WHERE artist=\"" + artist + "\"";
+        filterStr = "artist=\"" + artist + "\"";
     } else if (artist == "") {
-        queryStr = "SELECT * FROM LibraryTable WHERE album=\"" + album + "\"";
+        filterStr = "album=\"" + album + "\"";
     } else {
-        queryStr = "SELECT * FROM LibraryTable WHERE artist=\"" + artist +
-                   "\" AND album=\"" + album + "\"";
+        filterStr = "artist=\"" + artist + "\" AND album=\"" + album + "\"";
     }
 
-    QSqlQuery query(queryStr, QSqlDatabase::database(ARTISTCONN));
-    songQuery->setQuery(query);
+    songTableModel->setFilter(filterStr);
 }
 
 void MainWindow::resetQueries()
 {
     QSqlQuery query("SELECT DISTINCT artist FROM LibraryTable",
                     QSqlDatabase::database(ARTISTCONN));
-    artistQuery->setQuery(query);
 
+    artistQuery->setQuery(query);
     setAlbumListArist(selectedArtist);
     setSongListAlbumArtist(selectedArtist, selectedAlbum);
 }
