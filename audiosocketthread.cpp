@@ -66,29 +66,6 @@ QByteArray AudioSocketThread::readFile(const QString& path) {
         ds << file.readAll();
         return data;
     } else return 0;
-
-
-//    QFile file(path);
-//    QByteArray block;
-//    if (!file.exists())
-//        return block;
-//    file.open(QIODevice::ReadOnly);
-//    QDataStream out(&block, QIODevice::WriteOnly);
-//    QDataStream in(&file);
-//    char* data = new char[16384];
-//    int bytesRead = 0;
-
-//    out.setVersion(QDataStream::Qt_4_0);
-//    in.setVersion(QDataStream::Qt_4_0);
-
-//    out << (quint16)0;
-
-//    while ((bytesRead = in.readRawData(data, sizeof(data))) > 0) {
-//        out.writeRawData(data, bytesRead);
-//    }
-//    QByteArray dataArray(data);
-//    delete data;
-    //    return dataArray;
 }
 
 QString AudioSocketThread::getFilePathForID(const QString &id)
@@ -97,35 +74,6 @@ QString AudioSocketThread::getFilePathForID(const QString &id)
 }
 
 void AudioSocketThread::slotReadyRead() {
-//    QByteArray data;
-//    const qint16 bufSize = 16384;
-//    char buf[bufSize];
-//    QDataStream sockStrm(socket);
-//    sockStrm.setVersion(QDataStream::Qt_4_0);
-//    quint16 msgSize = 0;
-//    sockStrm >> msgSize;
-
-//    qint16 bytesRead = 0;
-//    qint16 totalBytesRead = 0;
-//    int bytesLeft = 0;
-//    qint16 maxRead = (msgSize < bufSize) ? msgSize : bufSize;
-
-//    QDataStream dataStrm(&data, QIODevice::ReadWrite);
-//    dataStrm.setVersion(QDataStream::Qt_4_0);
-
-//    do {
-//        bytesRead = socket->read(buf, maxRead);
-//        if (bytesRead == -1)
-//            return;
-//        totalBytesRead += bytesRead;
-//        dataStrm.writeRawData(buf, bytesRead);
-//        bytesLeft = msgSize - totalBytesRead;
-//        if (bytesLeft < maxRead)
-//            maxRead = bytesLeft;
-
-//    } while(bytesLeft > 0);
-//    this->sendData(this->readFile(data));
-
     char msgSizeBuf[2];
     m_socket->read(msgSizeBuf, 2);  // read in message size
     // TODO: needs a safety net to make sure a message that's too large isn't

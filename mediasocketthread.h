@@ -12,8 +12,6 @@ public:
     MediaSocketThread(int socketDesc);
     ~MediaSocketThread();
 
-//    QTcpSocket* getSocket() const { return socket; }
-
 public slots:
     void slotReadyRead();
     void sendData(QByteArray dataToSend);

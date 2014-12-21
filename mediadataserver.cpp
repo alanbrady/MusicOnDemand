@@ -96,7 +96,6 @@ QByteArray MediaDataServer::getAlbumArt(const QString &filePath) const {
 }
 
 QByteArray MediaDataServer::getID3Tags(const QString &filePath) const {
-//    return tagToBytes(ID3TagInterface::getTags(filePath.toUtf8()));
     Tag tag = parser.getTag(filePath);
     if (tag.isValid())
         return tagToBytes(tag);
@@ -110,14 +109,6 @@ QByteArray MediaDataServer::tagToBytes(Tag tag) const {
     out.setVersion(QDataStream::Qt_5_0);
     QString tagStr;
 
-//    for (int i = 0; i < tag.size(); i++) {
-//        tagsStr += tag.at(i).first;
-//        tagsStr += " | ";
-//        tagsStr += tag.at(i).second;
-//        tagsStr += "\n";
-//    }
-//    tagsStr.chop(1);
-
     tagStr += "Artist | " + tag.getArtist() + "\n";
     tagStr += "Album | " + tag.getAlbum() + "\n";
     tagStr += "Title | " + tag.getTitle() + "\n";
@@ -126,18 +117,3 @@ QByteArray MediaDataServer::tagToBytes(Tag tag) const {
     out.writeRawData(tagStr.toUtf8(), tagStr.size());
     return data;
 }
-
-//// Unit Test ************************************************
-
-//#ifdef DEBUG
-
-//void MediaDataServer_Test::test_serverConnection() {
-//    MediaDataServer server;
-//    QVERIFY(server.listen(QHostAddress::LocalHost, 50009));
-//    QVERIFY(server.isListening());
-//    qDebug() << "awaiting client connection...";
-//    QVERIFY(server.waitForNewConnection(-1));
-//    QTest::qSleep(500);
-//}
-
-//#endif // DEBUG
