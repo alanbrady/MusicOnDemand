@@ -1,3 +1,5 @@
+*.swp
+
 # C++ objects and libs
 
 *.slo
@@ -18,4 +20,8 @@ moc_*.cpp
 qrc_*.cpp
 Makefile
 *.autosave
-
+Makefile*
+debug/
+*.db
+object_script*
+ui_*
