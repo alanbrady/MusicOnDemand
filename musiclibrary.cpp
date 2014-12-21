@@ -16,15 +16,16 @@ const int MusicLibrary::MAX_CRCS =          1000;
 const int MusicLibrary::MAX_FILES =         1000;
 
 
-MusicLibrary::MusicLibrary(QObject* parent)
-    : QObject(parent),
-      crcDbConnName("CRC_DB_CONN"), libraryDbConnName("LIB_DB_CONN"),
-      parser(ID3TagParser::V2, false)
-{
-    initSql();
-}
+//MusicLibrary::MusicLibrary(QObject* parent)
+//    : QObject(parent),
+//      crcDbConnName("CRC_DB_CONN"), libraryDbConnName("LIB_DB_CONN"),
+//      parser(ID3TagParser::V2, false)
+//{
+//    initSql();
+//}
 
-MusicLibrary::MusicLibrary(const char *crcDatabaseConnection, const char *libraryDatabaseConnection, QObject* parent)
+MusicLibrary::MusicLibrary(QObject* parent, const char *libraryDatabaseConnection,
+                           const char *crcDatabaseConnection)
     : QObject(parent),
       crcDbConnName(crcDatabaseConnection),
       libraryDbConnName(libraryDatabaseConnection),
@@ -113,6 +114,10 @@ quint16 MusicLibrary::generateFileCRC(const QString &path) const {
 }
 
 // Main crc generator func, given a data stream make a crc
+// TODO: Figure out what the heck I was doing here...
+//       Something to do with xor'ing with a CRC bit string and
+//       bit shifting.  At the very least there's probably a better
+//       way to do this...
 quint16 MusicLibrary::calculateCRC(QDataStream& ds) const {
     ds.device()->seek(0);
     quint32 dbits;
@@ -162,7 +167,6 @@ void MusicLibrary::catalogDirectory(const QString &dir, const quint16 crc, bool 
     }
 
     QStringList nameFilters;
-//    nameFilters << "*.mp3" << "*.ogg" << "*.flac" << "*.wav";
     // disabled all but mp3 until ID3 tagging has been updated
     nameFilters << "*.mp3";
     QFileInfoList files = d.entryInfoList(nameFilters, QDir::Files);
@@ -184,6 +188,8 @@ void MusicLibrary::checkFiles(const QFileInfoList &files) {
         filesToUpdate.clear();
     }
 }
+
+
 
 
 // ************ SQL ************* //
@@ -342,4 +348,17 @@ void MusicLibrary::saveSongs(const QStringList& files) {
         query.exec(temp);
     }
     query.exec("END;");
+}
+
+QString MusicLibrary::getFilePathForId(const QString &id)
+{
+    QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
+    QString stmt = "SELECT filePath from LibraryTable where ROWID=" + id;
+    query.exec(stmt);
+
+    QString filePath = "";
+    if (query.next()) {
+        filePath = query.value(0).toString();
+    }
+    return filePath;
 }

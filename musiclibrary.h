@@ -20,13 +20,16 @@ public:
     static const int        MAX_FILES;
 
 
-    explicit MusicLibrary(QObject* parent = 0);
-    MusicLibrary(const char* crcDatabaseConnection, const char* libraryDatabaseConnection, QObject* parent = 0);
+//    explicit MusicLibrary(QObject* parent = 0);
+    explicit MusicLibrary(QObject* parent = 0,
+                          const char* libraryDatabaseConnection = "LIB_DB_CONN",
+                          const char* crcDatabaseConnection = "CRC_DB_CONN");
     ~MusicLibrary();
 
     void addDirectory(const QString& dir, bool recursive = true);
     void removeDirectory(const QString& dir);
     void checkUserDirectories();
+    QString getFilePathForId(const QString& id);
 
     const char* getLibraryConnName() const { return libraryDbConnName; }
     const char* getCrcConnName() const { return crcDbConnName; }
@@ -58,9 +61,12 @@ private:
     void saveCRCs(const QList<QPair<QString, quint16> >& crcs);
     void saveSong(const QString& path);
     void saveSongs(const QStringList& files);
+
+
     void catalogDirectory(const QString& dir, const quint16 crc, bool recursive = true);
     void checkFile(const QString& path);
     void checkFiles(const QFileInfoList& files);
+
 
     bool createTable(QSqlDatabase db, const QString &name, const QString &fields);
 
