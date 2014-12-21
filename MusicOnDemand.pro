@@ -11,7 +11,7 @@
 #    ../taglib-1.6.3/taglib/toolkit \
 #    ../taglib-1.6.3/taglib/mpeg
 
-LIBS += ../taglib-1.6.3/taglib-release/libtaglib.a
+#LIBS += ../taglib-1.6.3/taglib-release/libtaglib.a
 
 QT       += core gui network sql
 
