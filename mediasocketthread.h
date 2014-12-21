@@ -27,7 +27,7 @@ protected:
 
 private:
     const int m_sock;
-    QTcpSocket* socket;
+    QTcpSocket* m_socket;
 
 };
 
