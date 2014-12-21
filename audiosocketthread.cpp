@@ -131,7 +131,10 @@ void AudioSocketThread::slotReadyRead() {
     // TODO: needs a safety net to make sure a message that's too large isn't
     // attempted
 
-    unsigned int msgSize = (int)msgSizeBuf;
+//    unsigned int msgSize = (int)msgSizeBuf;
+    unsigned int msgSize = 0;
+    memcpy(&msgSize, msgSizeBuf, 2);
+
     char* buf = new char[msgSize+1];
     buf[msgSize] = '\0'; // put in null terminator
     int bytesLeft = msgSize;
@@ -154,6 +157,7 @@ void AudioSocketThread::slotReadyRead() {
 
     // read in file data and send it
     sendData(readFile(filePath));
+    delete buf;
 }
 
 void AudioSocketThread::sendData(QByteArray dataToSend) {
