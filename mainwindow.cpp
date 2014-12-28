@@ -18,7 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
     statusLabel->setMaximumWidth(600);
     ui->statusBar->addWidget(statusLabel);
     statusLabel->setText("[MusicOnDemand]");
-    server.start();
+//    server.start();
+
+    audioDataServer = ServerFactory::createAudioDataServer(50008);
+    mediaDataServer = ServerFactory::createMediaDataServer(50009);
 
     mlDial = new ManageLibraryDialog(this);
 
@@ -114,6 +117,9 @@ MainWindow::~MainWindow()
     db.close();
 
     delete ui;
+
+    delete audioDataServer;
+    delete mediaDataServer;
 }
 
 void MainWindow::artistListClicked(const QModelIndex &index)

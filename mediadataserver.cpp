@@ -10,42 +10,32 @@
 
 #include <QDebug>
 
-MediaDataServer::MediaDataServer(QObject *parent)
-    : QTcpServer(parent), parser(ID3TagParser::V2, false)
+MediaDataServer::MediaDataServer(quint16 port)
+    : ServerInterface(port), m_id3Parser(ID3TagParser::V2, false)
 {
 }
 
-void MediaDataServer::incomingConnection(int socketDesc) {
-    MediaSocketThread *thread = new MediaSocketThread(socketDesc);
-    connect (thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect (thread, SIGNAL(messageReceived(MediaSocketThread*, QByteArray)),
-             this, SLOT(receiveMessage(MediaSocketThread*, QByteArray)));
+void MediaDataServer::parseMessage(const char *data, const unsigned int dataLen,
+                                   QTcpSocket *sender)
+{
+    Message msg;
+    memcpy(&msg, data, 2);
+    QString requestString = QString::fromLocal8Bit(data+2, dataLen-2);
+    QByteArray returnData = getReturnData(msg, requestString);
+    sendData(sender, returnData, returnData.length());
 }
 
-void MediaDataServer::receiveMessage(MediaSocketThread *thread, QByteArray msgData) {
-    QDataStream in(&msgData, QIODevice::ReadOnly);
-    quint16 intm;
-    in >> intm;
-    MESSAGE m = MESSAGE(intm);
-    uint msgSize = msgData.size() - sizeof(quint16);
-    char* msgStr = new char[msgSize];
-    in >> msgStr;
-    QByteArray data = getData(m, msgStr);
-    if (!data.isEmpty())
-        QMetaObject::invokeMethod(thread, "sendData", Qt::QueuedConnection, Q_ARG(QByteArray, data));
-    delete msgStr;
-}
-
-QByteArray MediaDataServer::getData(MESSAGE m, QString msg) const {
-    switch(m) {
+QByteArray MediaDataServer::getReturnData(Message msg,
+                                          const QString& requestData) const {
+    switch(msg) {
     case LIB_MOD_DATE_REQ:
         return getLibraryLastModified();
     case LIB_FILE_REQ:
         return getLibraryDatabase();
     case ALBUM_ART_REQ:
-        return getAlbumArt(msg);
+        return getAlbumArt(requestData);
     case ID3_REQ:
-        return getID3Tags(msg);
+        return getID3Tags(requestData);
     default:
         return 0;
     }
@@ -96,7 +86,7 @@ QByteArray MediaDataServer::getAlbumArt(const QString &filePath) const {
 }
 
 QByteArray MediaDataServer::getID3Tags(const QString &filePath) const {
-    Tag tag = parser.getTag(filePath);
+    Tag tag = m_id3Parser.getTag(filePath);
     if (tag.isValid())
         return tagToBytes(tag);
     else

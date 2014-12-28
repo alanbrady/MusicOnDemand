@@ -13,42 +13,39 @@
 
 #LIBS += ../taglib-1.6.3/taglib-release/libtaglib.a
 
-QT       += core gui network sql
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui network sql widgets
 
 TARGET = MusicOnDemandServer
 TEMPLATE = app
 
 HEADERS += \
-    socketinterface.h \
-    audiosocketthread.h \
     audiodataserver.h \
     mainwindow.h \
     tdd.h \
     mediadataserver.h \
-    mediasocketthread.h \
     musiclibrary.h \
-    id3taginterface.h \
     musiclibrarythread.h \
     managelibrarydialog.h \
     tag.h \
-    id3tagparser.h
+    id3tagparser.h \
+    serverinterface.h \
+    serverfactory.h \
+    socketlist.h
 
 SOURCES += \
-    socketinterface.cpp \
-    audiosocketthread.cpp \
     audiodataserver.cpp \
     main.cpp\
     mainwindow.cpp \
     mediadataserver.cpp \
-    mediasocketthread.cpp \
     musiclibrary.cpp \
     id3taginterface.cpp \
     musiclibrarythread.cpp \
     managelibrarydialog.cpp \
     tag.cpp \
-    id3tagparser.cpp
+    id3tagparser.cpp \
+    serverinterface.cpp \
+    serverfactory.cpp \
+    socketlist.cpp
 
 FORMS    += mainwindow.ui \
     managelibrarydialog.ui

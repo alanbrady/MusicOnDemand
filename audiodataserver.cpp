@@ -1,34 +1,36 @@
 #include "audiodataserver.h"
-#include "audiosocketthread.h"
-//#include "test/mock_audiodataclient.h"
 
 #include <QEventLoop>
 #include <QDebug>
 
-AudioDataServer::AudioDataServer(QObject *parent)
-    : QTcpServer(parent)
+AudioDataServer::AudioDataServer(quint16 port)
+    : ServerInterface(port)
 {
 }
 
-void AudioDataServer::incomingConnection(int socketDesc) {
-    AudioSocketThread *thread = new AudioSocketThread(socketDesc);
-    connect (thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-//    thread->start();
+void AudioDataServer::parseMessage(const char *msg, const unsigned int msgLen,
+                                   QTcpSocket *sender)
+{
+    QString id = QString::fromLocal8Bit(msg, msgLen);
+    QByteArray returnData = readFile(getFilePathForID(id));
+    sendData(sender, returnData, returnData.length());
+
+}
+
+QByteArray AudioDataServer::readFile(const QString &path)
+{
+    QFile file(path);
+    if (file.exists()) {
+        QByteArray data;
+        QDataStream ds(&data, QIODevice::WriteOnly);
+        ds << file.readAll();
+        return data;
+    } else return 0;
+}
+
+QString AudioDataServer::getFilePathForID(const QString &id)
+{
+    return musicLibrary.getFilePathForId(id);
 }
 
 
-//// Unit Test ************************************************
-
-//#ifdef DEBUG
-
-//void AudioDataServer_Test::test_serverConnection() {
-//    AudioDataServer server;
-//    server.setFilePath("simple.txt");
-//    QVERIFY(server.listen(QHostAddress::LocalHost, 50008));
-//    QVERIFY(server.isListening());
-//    qDebug() << "awaiting client connection...";
-//    QVERIFY(server.waitForNewConnection(-1));
-//    QTest::qSleep(1000);
-//}
-
-//#endif // DEBUG

@@ -24,15 +24,6 @@ public:
     const QHash<QString, QString>& getExtendedData() const
         { return (*m_ext); }
 
-//    void setTitle(const char* title);
-//    void setArtist(const char* artist);
-//    void setAlbumArtist(const char* albumArtist);
-//    void setAlbum(const char* album);
-//    void setYear(const quint16 year);
-//    void setTrack(const unsigned char track);
-//    void setGenre(const unsigned char genre);
-//    void addExtendedData(const QString& key, const QString& value);
-
     void setTitle(const QString& title);
     void setArtist(const QString& artist);
     void setAlbumArtist(const QString& albumArtist);

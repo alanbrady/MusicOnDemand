@@ -5,9 +5,10 @@
 #include <QLabel>
 #include <QSqlQueryModel>
 #include <QSqlTableModel>
-#include "socketinterface.h"
+//#include "socketinterface.h"
 #include "musiclibrarythread.h"
 #include "managelibrarydialog.h"
+#include "serverfactory.h"
 
 namespace Ui {
     class MainWindow;
@@ -35,7 +36,9 @@ private:
     static const char* SONGCONN;
 
     Ui::MainWindow *ui;
-    SocketInterface server;
+//    SocketInterface server;
+    ServerInterface* audioDataServer;
+    ServerInterface* mediaDataServer;
     MusicLibraryThread libraryThread;
     ManageLibraryDialog* mlDial;
     QSqlQueryModel* artistQuery;
