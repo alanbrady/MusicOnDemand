@@ -65,9 +65,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // enable sorting
     QHeaderView* header = ui->songView->horizontalHeader();
     header->setSortIndicator(2, Qt::AscendingOrder);
-    header->setSectionsMovable(true);
+//    header->setSectionsMovable(true);
     header->setSortIndicatorShown(true);
-    header->setSectionsClickable(true);
+//    header->setSectionsClickable(true);
     header->setStretchLastSection(true);
     ui->songView->setSortingEnabled(true);
 

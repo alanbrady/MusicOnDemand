@@ -1,7 +1,7 @@
 #include "mediadataserver.h"
 #include <QFile>
 #include <QDir>
-#include <QFIleInfo>
+#include <QFileInfo>
 #include <QTemporaryFile>
 #include <QImage>
 #include <QDateTime>
@@ -96,7 +96,6 @@ QByteArray MediaDataServer::getID3Tags(const QString &filePath) const {
 QByteArray MediaDataServer::tagToBytes(Tag tag) const {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_0);
     QString tagStr;
 
     tagStr += "Artist | " + tag.getArtist() + "\n";

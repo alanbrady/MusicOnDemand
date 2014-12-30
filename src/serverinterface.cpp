@@ -71,7 +71,7 @@ void ServerInterface::socketReadyRead()
     // retrieve the socket that issued ready read and parse data in a separate
     // thread object (QtConcurrent::run)
     QTcpSocket* socket = static_cast<QTcpSocket*>(QObject::sender());
-    QtConcurrent::run(this, &doSocketRead, socket);
+    QtConcurrent::run(this, &ServerInterface::doSocketRead, socket);
 }
 
 void ServerInterface::clientAwaitingConnect()

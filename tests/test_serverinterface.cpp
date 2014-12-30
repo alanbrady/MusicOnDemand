@@ -9,7 +9,7 @@ public:
 
 private slots:
     void test_fail() { QVERIFY(true); }
-//    void test_blank() { QCOMPARE("foo", "bar"); }
+    void test_blank() { QCOMPARE("foo", "bar"); }
 };
 
 QTEST_MAIN(Test_ServerInterface)

@@ -1,7 +1,7 @@
 #ifndef SERVERINTERFACE_H
 #define SERVERINTERFACE_H
 
-#include <QtConcurrent/QtConcurrentRun>
+#include <QtConcurrentRun>
 #include <QTcpServer>
 #include <QTcpSocket>
 
