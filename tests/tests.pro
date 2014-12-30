@@ -1,11 +1,19 @@
 include(../defaults.pri)
 
+Debug:DESTDIR = ./
+Release:DESTDIR = ./
+
 TEMPLATE = app
 
 CONFIG += console
 CONFIG -= app_bundle
-CONFIG -= qt
 
-SOURCES += main.cpp
+QT += testlib
 
 LIBS += -L../src -lMusicOnDemand
+
+SOURCES += \
+    test_serverinterface.cpp
+
+#HEADERS += \
+#    test_serverinterface.h

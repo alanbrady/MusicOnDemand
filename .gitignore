@@ -1,5 +1,6 @@
 *.swp
 sqlite3.exe
+tests.exe
 # C++ objects and libs
 
 *.slo
