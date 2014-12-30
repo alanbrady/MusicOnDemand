@@ -2,7 +2,6 @@
 sqlite3.exe
 tests/tests*
 app/app*
-
 *.moc
 
 # C++ objects and libs
@@ -17,6 +16,7 @@ app/app*
 *.so.*
 *.dll
 *.dylib
+*.gcno
 
 # Qt-es
 
