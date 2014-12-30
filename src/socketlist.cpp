@@ -51,7 +51,9 @@ SocketListNode::SocketListNode(SocketListNode *next,
 {
     // if socket disconnects, we want to remove from list to avoid eating up
     // all the memory
-    connect(m_socket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+    if (socket != 0) {
+        connect(m_socket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+    }
 }
 
 SocketListNode::~SocketListNode()

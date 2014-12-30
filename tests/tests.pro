@@ -1,5 +1,10 @@
 include(../defaults.pri)
 
+CONFIG(debug, debug|release) {
+    QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage -O0
+    LIBS += -lgcov
+}
+
 Debug:DESTDIR = ./
 Release:DESTDIR = ./
 

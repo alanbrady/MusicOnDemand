@@ -1,15 +1,15 @@
 include(../defaults.pri)
 
-# needed for gcov
 CONFIG(debug, debug|release) {
-    QMAKE_CXXFLAGS += -fprofile-arcs
-    QMAKE_CXXFLAGS += -ftest-coverage
-    QMAKE_LFLAGS += -lgcov -coverage
+    QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage -O0
+#    LIBS += -lgcov
+    QMAKE_LFLAGS += -coverage
 }
 
 CONFIG += qt
 TARGET = MusicOnDemand
 TEMPLATE = lib
+CONFIG += staticlib
 
 Debug:DESTDIR = ./
 Release:DESTDIR = ./
