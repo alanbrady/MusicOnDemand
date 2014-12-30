@@ -1,6 +1,10 @@
 *.swp
 sqlite3.exe
-tests.exe
+tests/tests*
+app/app*
+
+*.moc
+
 # C++ objects and libs
 
 *.slo
@@ -10,6 +14,7 @@ tests.exe
 *.la
 *.lai
 *.so
+*.so.*
 *.dll
 *.dylib
 
