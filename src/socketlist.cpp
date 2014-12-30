@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "socketlist.h"
 
 SocketList::SocketList()
@@ -8,14 +9,19 @@ SocketList::SocketList()
 
 SocketList::~SocketList()
 {
+    // TODO: memory cleanup got botched somewhere.  all code here is highly suspect
+
     // m_head should never be null, instead m_head can hold an invalid object
-    SocketListNode* iter = m_head;
-    SocketListNode* temp;
-    do {
-        temp = iter->next();
-        delete iter;
-        iter = temp;
-    } while (temp != 0);
+//    qDebug() << "Head: " << m_head;
+//    SocketListNode* iter = m_head;
+//    SocketListNode* temp;
+//    do {
+////        qDebug() << "Iter: " << iter;
+//        temp = iter->next();
+//        delete iter;
+//        iter = temp;
+//    } while (iter != 0);
+//    qDebug() << "Finish";
 }
 
 bool SocketList::isEmpty() const
@@ -73,8 +79,8 @@ void SocketListNode::socketDisconnected()
     // since the node only knows about itself and next, we copy next into self
     // and delete next
     SocketListNode* temp = m_next;
-    delete m_socket;
     m_socket = m_next->getSocket();
+    m_next->setSocket(0);
     m_next = m_next->next();
     delete temp;
 }

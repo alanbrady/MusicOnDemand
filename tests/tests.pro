@@ -2,7 +2,7 @@ include(../defaults.pri)
 
 CONFIG(debug, debug|release) {
     QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage -O0
-    LIBS += -lgcov
+    QMAKE_LFLAGS += -coverage
 }
 
 Debug:DESTDIR = ./
@@ -20,5 +20,3 @@ LIBS += -L../src -lMusicOnDemand
 SOURCES += \
     test_serverinterface.cpp
 
-#HEADERS += \
-#    test_serverinterface.h

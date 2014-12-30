@@ -41,6 +41,7 @@ public:
     ~SocketListNode();
 
     QTcpSocket* getSocket() const { return m_socket; }
+    void setSocket(QTcpSocket* sock) { m_socket = sock; }
 
     SocketListNode* next() const { return m_next; }
     void setNext(SocketListNode* node) { m_next = node; }
