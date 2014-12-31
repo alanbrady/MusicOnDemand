@@ -1,9 +1,15 @@
 #ifndef SERVERINTERFACE_H
 #define SERVERINTERFACE_H
 
-#include <QtConcurrentRun>
 #include <QTcpServer>
 #include <QTcpSocket>
+
+#if QT_VERSION >= 0x050000
+#include <QtConcurrent/QtConcurrentRun>
+#else
+#include <QtConcurrentRun>
+#endif
+
 
 #include "socketlist.h"
 
