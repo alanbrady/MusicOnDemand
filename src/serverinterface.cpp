@@ -19,7 +19,7 @@ void ServerInterface::sendData(QTcpSocket *socket, const char *data,
                                const quint16 dataLen)
 {
     char dataLenMsg[2];
-    // pack the data length into a two 8 bit chars since dataLen is 16 bits
+//     pack the data length into a two 8 bit chars since dataLen is 16 bits
     dataLenMsg[0] = (char)dataLen;
     dataLenMsg[1] = (char)(dataLen >> 8);
     socket->write(dataLenMsg, 2);
