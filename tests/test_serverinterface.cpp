@@ -17,8 +17,8 @@ public:
 
 private slots:
     void initTestCase();
-    void test_parseMessage();
-    void test_incompleteMessage();
+    void test_parse_message();
+    void test_incomplete_message();
 
 private:
 };
@@ -55,7 +55,7 @@ void Test_ServerInterface::initTestCase()
 
 }
 
-void Test_ServerInterface::test_parseMessage()
+void Test_ServerInterface::test_parse_message()
 {
     MockServerInterface server(49999);
     MockClient client;
@@ -69,7 +69,7 @@ void Test_ServerInterface::test_parseMessage()
     QCOMPARE(server.getReceivedMessage(), QString("test"));
 }
 
-void Test_ServerInterface::test_incompleteMessage()
+void Test_ServerInterface::test_incomplete_message()
 {
     MockServerInterface server(49999);
     QSignalSpy serverSpy(&server, SIGNAL(error(QString)));
