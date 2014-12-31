@@ -123,7 +123,7 @@ void Test_ServerInterface::test_server_send_message()
     char recvData[6];
     char recvDataCmp[7] = "--test";
     memcpy(recvDataCmp, &size, 2);
-    QCOMPARE(client.read(recvData, 6), 6);
+    QCOMPARE((int)client.read(recvData, 6), 6);
     QVERIFY(memcmp(recvData, recvDataCmp, 6) == 0);
 }
 
