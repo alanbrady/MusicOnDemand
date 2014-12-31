@@ -1,6 +1,7 @@
 #include <QtTest/QtTest>
 #include <QTcpSocket>
 #include <QSignalSpy>
+#include <QDebug>
 
 #include <serverinterface.h>
 
@@ -19,6 +20,7 @@ private slots:
     void initTestCase();
     void test_parse_message();
     void test_incomplete_message();
+    void test_message_too_large();
 
 private:
 };
@@ -78,7 +80,25 @@ void Test_ServerInterface::test_incomplete_message()
     char msg[7] = "--test";
     quint16 size = 20;
     memcpy(msg, &size, 2);
-    client.write(msg,5);
+    client.write(msg,7);
+    QVERIFY(client.waitForBytesWritten(3000));
+    client.disconnectFromHost();
+    QTest::qWait(500);
+    QCOMPARE(serverSpy.count(), 1);
+}
+
+void Test_ServerInterface::test_message_too_large()
+{
+    MockServerInterface server(49999);
+    QSignalSpy serverSpy(&server, SIGNAL(error(QString)));
+
+    MockClient client;
+    QVERIFY(client.waitForConnected(3000));
+
+    char msg[7] = "--test";
+    quint16 size = 1025;
+    memcpy(msg, &size, 2);
+    client.write(msg, 7);
     QVERIFY(client.waitForBytesWritten(3000));
     QTest::qWait(500);
     QCOMPARE(serverSpy.count(), 1);

@@ -38,6 +38,8 @@ void ServerInterface::doSocketRead(QTcpSocket *socket)
         // limit the read size to prevent malicious read requests
         if (msgSize > MAX_READ) {
             emit error("Error: read size too large.");
+            char nullBuf[1024];
+            while ((socket->read(nullBuf, 1024)) > 0); // clear out read buffer
         } else {
             // until we read the entire message, read socket into data array
             char* data = new char[msgSize];
@@ -46,7 +48,7 @@ void ServerInterface::doSocketRead(QTcpSocket *socket)
             quint16 bytesLeft = msgSize;
             do {
                 bytesRead = socket->read(data+totalBytesRead, bytesLeft);
-                if (bytesRead != -1) {
+                if (bytesRead > 0) {
                     totalBytesRead += bytesRead;
                     bytesLeft -= bytesRead;
                 } else {
@@ -71,7 +73,8 @@ void ServerInterface::socketReadyRead()
     // retrieve the socket that issued ready read and parse data in a separate
     // thread object (QtConcurrent::run)
     QTcpSocket* socket = static_cast<QTcpSocket*>(QObject::sender());
-    QtConcurrent::run(this, &ServerInterface::doSocketRead, socket);
+//    QtConcurrent::run(this, &ServerInterface::doSocketRead, socket->socketDescriptor());
+    doSocketRead(socket);
 }
 
 void ServerInterface::clientAwaitingConnect()
