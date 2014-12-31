@@ -46,7 +46,7 @@ void ServerInterface::doSocketRead(QTcpSocket *socket)
             quint16 bytesLeft = msgSize;
             do {
                 bytesRead = socket->read(data+totalBytesRead, bytesLeft);
-                if (bytesRead > 0) {
+                if (bytesRead != -1) {
                     totalBytesRead += bytesRead;
                     bytesLeft -= bytesRead;
                 } else {
