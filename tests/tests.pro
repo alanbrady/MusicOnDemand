@@ -18,5 +18,12 @@ QT += testlib
 LIBS += -L../src -lMusicOnDemand
 
 SOURCES += \
-    test_serverinterface.cpp
+    test_serverinterface.cpp \
+    test_mediadataserver.cpp \
+    main.cpp
+
+HEADERS += \
+    mockclient.h \
+    test_mediadataserver.h \
+    test_serverinterface.h
 
