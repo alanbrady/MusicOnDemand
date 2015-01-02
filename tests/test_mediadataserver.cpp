@@ -2,7 +2,7 @@
 
 #include<QFileInfo>
 #include "test_mediadataserver.h"
-#include "mockClient.h"
+#include "mockclient.h"
 
 void Test_MediaDataServer::test_library_date_reqest()
 {
