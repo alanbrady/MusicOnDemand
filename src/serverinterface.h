@@ -4,13 +4,6 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-#if QT_VERSION >= 0x050000
-#include <QtConcurrent/QtConcurrentRun>
-#else
-#include <QtConcurrentRun>
-#endif
-
-
 #include "socketlist.h"
 
 #define MAX_READ 1024
