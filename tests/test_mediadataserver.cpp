@@ -7,6 +7,9 @@
 
 void Test_MediaDataServer::test_library_date_reqest()
 {
+    QFileInfo library("md_library.db");
+    QVERIFY(library.exists());
+
     MediaDataServer server(50003);
     MockClient client(50003);
 
@@ -30,9 +33,35 @@ void Test_MediaDataServer::test_library_date_reqest()
     byteSwap<char>(respBuf, 8);
     qint64 resp = 0;
     memcpy(&resp, respBuf, 8);
-    QFileInfo library("md_library.db");
     qint64 localMsecs = library.lastModified().toMSecsSinceEpoch();
     QCOMPARE(localMsecs, resp);
+}
+
+void Test_MediaDataServer::test_library_file_request()
+{
+    MediaDataServer server(50007);
+    MockClient client(50007);
+
+    QVERIFY(client.waitForConnected(1000));
+    char req[4] = { 0x2, 0x0, 0x2, 0x0 };
+    QCOMPARE((int)client.write(req, 4), 4);
+
+    QTest::qWait(500);
+    QFile libraryFile("md_library.db");
+    QVERIFY(libraryFile.exists());
+    char* libraryFileData = new char[libraryFile.size()];
+
+    char dataSizeBuf[2];
+    client.read(dataSizeBuf, 2);
+    quint16 dataSize = 0;
+    memcpy(&dataSize, dataSizeBuf, 2);
+    char* libraryFileRead = new char[dataSize];
+    quint64 readSize = client.read(libraryFileRead, dataSize);
+    QCOMPARE((quint16)readSize, dataSize);
+    QVERIFY(memcmp(libraryFileRead, libraryFileData, dataSize) == 0);
+
+    delete[] libraryFileData;
+    delete[] libraryFileRead;
 }
 
 template <class T>

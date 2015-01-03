@@ -9,11 +9,8 @@ class Test_MediaDataServer : public QObject {
     Q_OBJECT
 private slots:
     void test_library_date_reqest();
-};
+    void test_library_file_request();
 
-class MockMediaDataServer : public MediaDataServer {
-public:
-    MockMediaDataServer(quint16 port) : MediaDataServer(port) {}
 };
 
 template <class T>
