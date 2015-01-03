@@ -19,9 +19,12 @@ void Test_MediaDataServer::test_library_date_reqest()
     memset(respBuf, '\0', 8);
     char respSizeBuf[2];
     QTest::qWait(500);
-    client.read(respSizeBuf, 2);
+    qint64 readAmt = client.read(respSizeBuf, 2);
+    QCOMPARE(readAmt, (qint64)2);
+    QTest::qWait(500);
     quint16 respSize = 0;
     memcpy(&respSize, respSizeBuf, 2);
+    QCOMPARE(respSize, (quint16)8);
 
     client.read(respBuf, 8);
     byteSwap<char>(respBuf, 8);
