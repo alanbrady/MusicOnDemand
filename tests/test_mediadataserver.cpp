@@ -13,19 +13,15 @@ void Test_MediaDataServer::test_library_date_reqest()
     QVERIFY(client.waitForConnected(1000));
     char req[4] = { 0x2, 0x0, 0x1, 0x0 };
     QCOMPARE((int)client.write(req, 4), 4);
-//    client.write(req, 4);
     QVERIFY(client.waitForBytesWritten(1000));
 
     char respBuf[8];
     memset(respBuf, '\0', 8);
     char respSizeBuf[2];
     QTest::qWait(500);
-//    quint64 bytesAvail = client.bytesAvailable();
-//    QCOMPARE((int)bytesAvail, 10);
     client.read(respSizeBuf, 2);
     quint16 respSize = 0;
     memcpy(&respSize, respSizeBuf, 2);
-    QCOMPARE((int)respSize, 8);
 
     client.read(respBuf, 8);
     byteSwap<char>(respBuf, 8);
