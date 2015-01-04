@@ -12,8 +12,10 @@ public:
     explicit MusicLibraryThread(QObject *parent = 0);
     ~MusicLibraryThread();
 
-    const QString getLibraryDbConn() const { return library->getLibraryConnName(); }
-    const QString getCrcDbConn() const { return library->getCrcConnName(); }
+//    const QString getLibraryDbConn() const { return library->getLibraryConnName(); }
+    const QString getLibraryDbConn() const { return MusicLibrary::LIB_DB_CONN; }
+//    const QString getCrcDbConn() const { return library->getCrcConnName(); }
+    const QString getCrcDbConn() const { return MusicLibrary::CRC_DB_CONN; }
 
 signals:
     void statusUpdate(const QString& newStatus);

@@ -14,7 +14,8 @@ const char* MusicLibrary::CRCDBPATH =       "md_crc.db";
 const quint16 MusicLibrary::CRCBITS =       0x8005;
 const int MusicLibrary::MAX_CRCS =          1000;
 const int MusicLibrary::MAX_FILES =         1000;
-
+const char* MusicLibrary::LIB_DB_CONN =      "LIB_DB_CONN";
+const char* MusicLibrary::CRC_DB_CONN =     "CRC_DB_CONN";
 
 //MusicLibrary::MusicLibrary(QObject* parent)
 //    : QObject(parent),
@@ -24,11 +25,10 @@ const int MusicLibrary::MAX_FILES =         1000;
 //    initSql();
 //}
 
-MusicLibrary::MusicLibrary(QObject* parent, const char *libraryDatabaseConnection,
-                           const char *crcDatabaseConnection)
+MusicLibrary::MusicLibrary(QObject* parent)
     : QObject(parent),
-      crcDbConnName(crcDatabaseConnection),
-      libraryDbConnName(libraryDatabaseConnection),
+//      crcDbConnName(crcDatabaseConnection),
+//      libraryDbConnName(libraryDatabaseConnection),
       parser(ID3TagParser::V2, false)
 {
     initSql();
@@ -195,13 +195,13 @@ void MusicLibrary::checkFiles(const QFileInfoList &files) {
 // ************ SQL ************* //
 
 void MusicLibrary::initSql() {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", libraryDbConnName);
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", LIB_DB_CONN);
     db.setDatabaseName(LIBRARYPATH);
     db.open();
     this->createTable(db, "LibraryTable",
                       "filePath TEXT PRIMARY KEY, fileSize INTEGER, artist TEXT, album TEXT, title TEXT, track INTEGER, date INTEGER");
 
-    db = QSqlDatabase::addDatabase("QSQLITE", crcDbConnName);
+    db = QSqlDatabase::addDatabase("QSQLITE", CRC_DB_CONN);
     db.setDatabaseName(CRCDBPATH);
     db.open();
     this->createTable(db, "CRCTable", "path TEXT PRIMARY KEY, crc INTEGER");
@@ -209,10 +209,10 @@ void MusicLibrary::initSql() {
 }
 
 void MusicLibrary::closeSql() {
-    QSqlDatabase db = QSqlDatabase::database(libraryDbConnName);
+    QSqlDatabase db = QSqlDatabase::database(LIB_DB_CONN);
     if (db.isOpen())
         db.close();
-    db = QSqlDatabase::database(crcDbConnName);
+    db = QSqlDatabase::database(CRC_DB_CONN);
     if (db.isOpen())
         db.close();
 }
@@ -229,7 +229,7 @@ bool MusicLibrary::createTable(QSqlDatabase db, const QString &name, const QStri
 
 QStringList MusicLibrary::getLibraryDirectories() const{
     QStringList dirs;
-    QSqlQuery query(QSqlDatabase::database(crcDbConnName));
+    QSqlQuery query(QSqlDatabase::database(CRC_DB_CONN));
     query.prepare("SELECT * FROM UserDirectories");
     query.exec();
     while (query.next()) {
@@ -239,7 +239,7 @@ QStringList MusicLibrary::getLibraryDirectories() const{
 }
 
 quint16 MusicLibrary::lookupCRC(const QString& dir){
-    QSqlQuery query(QSqlDatabase::database(crcDbConnName));
+    QSqlQuery query(QSqlDatabase::database(CRC_DB_CONN));
     QString stmt = "SELECT crc FROM CRCTable WHERE path='%1'";
     query.prepare(stmt.arg(dir));
     query.exec();
@@ -249,7 +249,7 @@ quint16 MusicLibrary::lookupCRC(const QString& dir){
 }
 
 void MusicLibrary::addDirectory(const QString& dir, bool recursive){
-    QSqlQuery query(QSqlDatabase::database(crcDbConnName));
+    QSqlQuery query(QSqlDatabase::database(CRC_DB_CONN));
     QString stmt = "INSERT INTO UserDirectories (path) VALUES ('%1')";
     query.prepare(stmt.arg(dir));
     if (query.exec()) {
@@ -261,7 +261,7 @@ void MusicLibrary::addDirectory(const QString& dir, bool recursive){
 }
 
 void MusicLibrary::removeDirectory(const QString& dir){
-    QSqlQuery query(QSqlDatabase::database(crcDbConnName));
+    QSqlQuery query(QSqlDatabase::database(CRC_DB_CONN));
     QString stmt = "DELETE FROM UserDirectories WHERE path='%1'";
     query.prepare(stmt.arg(dir));
     if (query.exec()) {
@@ -273,14 +273,14 @@ void MusicLibrary::removeDirectory(const QString& dir){
 }
 
 void MusicLibrary::saveCRC(const QString& path, const quint16 crc){
-    QSqlQuery query(QSqlDatabase::database(crcDbConnName));
+    QSqlQuery query(QSqlDatabase::database(CRC_DB_CONN));
     QString stmt = "INSERT OR REPLACE INTO CRCTable (path, crc) VALUES('%1', %2)";
     query.exec(stmt.arg(path).arg(crc));
 }
 
 void MusicLibrary::saveCRCs(const QList<QPair<QString, quint16> > &crcs) {
 //    emit statusUpdate("Saving crcs...");
-    QSqlQuery query(QSqlDatabase::database(crcDbConnName));
+    QSqlQuery query(QSqlDatabase::database(CRC_DB_CONN));
     query.exec("BEGIN;");
     QString stmt = "INSERT OR REPLACE INTO CRCTable (path, crc) VALUES('%1', %2)";
     for (int i = 0; i < crcs.size(); i++) {
@@ -297,7 +297,7 @@ void MusicLibrary::saveSong(const QString& path) {
         qDebug() << "Invalid tag: " << path;
         return;
     }
-    QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
+    QSqlQuery query(QSqlDatabase::database(LIB_DB_CONN));
     QFileInfo fi(path);
     QString queryStr = "";
     queryStr += "INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, ";
@@ -324,7 +324,7 @@ void MusicLibrary::saveSongs(const QStringList& files) {
     // statement strings with a += is probably better.
 
     Tag tag;
-    QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
+    QSqlQuery query(QSqlDatabase::database(LIB_DB_CONN));
     QString stmt = "";
     QString temp = "";
     stmt += "INSERT OR REPLACE INTO LibraryTable (filePath, fileSize, artist, ";
@@ -352,7 +352,7 @@ void MusicLibrary::saveSongs(const QStringList& files) {
 
 QString MusicLibrary::getFilePathForId(const QString &id)
 {
-    QSqlQuery query(QSqlDatabase::database(libraryDbConnName));
+    QSqlQuery query(QSqlDatabase::database(LIB_DB_CONN));
     QString stmt = "SELECT filePath from LibraryTable where ROWID=" + id;
     query.exec(stmt);
 

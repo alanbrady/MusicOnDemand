@@ -18,21 +18,20 @@ public:
     static const quint16    CRCBITS;
     static const int        MAX_CRCS;
     static const int        MAX_FILES;
-
+    static const char*      LIB_DB_CONN;
+    static const char*      CRC_DB_CONN;
 
 //    explicit MusicLibrary(QObject* parent = 0);
-    explicit MusicLibrary(QObject* parent = 0,
-                          const char* libraryDatabaseConnection = "LIB_DB_CONN",
-                          const char* crcDatabaseConnection = "CRC_DB_CONN");
+    explicit MusicLibrary(QObject* parent = 0);
     ~MusicLibrary();
 
     void addDirectory(const QString& dir, bool recursive = true);
     void removeDirectory(const QString& dir);
     void checkUserDirectories();
-    QString getFilePathForId(const QString& id);
+    static QString getFilePathForId(const QString& id);
 
-    const char* getLibraryConnName() const { return libraryDbConnName; }
-    const char* getCrcConnName() const { return crcDbConnName; }
+//    const char* getLibraryConnName() const { return libraryDbConnName; }
+//    const char* getCrcConnName() const { return crcDbConnName; }
 
 signals:
     void statusUpdate(const QString& newStatus);
@@ -40,8 +39,8 @@ signals:
     void directoryRemoved();
 
 private:
-    const char* crcDbConnName;
-    const char* libraryDbConnName;
+//    const char* crcDbConnName;
+//    const char* libraryDbConnName;
     QStringList filesToUpdate;
     QList<QPair<QString, quint16> > crcsToSave;
     unsigned int filesSaved;

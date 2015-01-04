@@ -6,6 +6,7 @@
 #include "tag.h"
 #include "id3tagparser.h"
 #include "serverinterface.h"
+#include "musiclibrary.h"
 
 class MediaDataServer : public ServerInterface {
     Q_OBJECT
@@ -23,12 +24,13 @@ private:
     };
 
     ID3TagParser m_id3Parser;
+//    MusicLibrary musicLibrary;
 
     QByteArray getReturnData(Message msg, const QString &requestData) const;
     QByteArray getLibraryLastModified() const;
     QByteArray getLibraryDatabase() const;
-    QByteArray getAlbumArt(const QString& filePath) const;
-    QByteArray getID3Tags(const QString& filePath) const;
+    QByteArray getAlbumArt(const QString& fileId) const;
+    QByteArray getID3Tags(const QString& fileId) const;
     QByteArray tagToBytes(Tag tag) const;
 
 };

@@ -54,12 +54,14 @@ QByteArray MediaDataServer::getLibraryLastModified() const {
 
 QByteArray MediaDataServer::getLibraryDatabase() const {
     QFile libFile(MusicLibrary::LIBRARYPATH);
+    libFile.open(QIODevice::ReadOnly);
     if (libFile.exists()) {
         return libFile.read(libFile.size());
     } else return 0;
 }
 
-QByteArray MediaDataServer::getAlbumArt(const QString &filePath) const {
+QByteArray MediaDataServer::getAlbumArt(const QString &fileId) const {
+    QString filePath = MusicLibrary::getFilePathForId(fileId);
     QDir fileDir = QFileInfo(filePath).dir();
     QFile lucky(fileDir.path() + "/Folder.jpg");
     QImage img;
@@ -85,7 +87,8 @@ QByteArray MediaDataServer::getAlbumArt(const QString &filePath) const {
     return imgData;
 }
 
-QByteArray MediaDataServer::getID3Tags(const QString &filePath) const {
+QByteArray MediaDataServer::getID3Tags(const QString &fileId) const {
+    QString filePath = MusicLibrary::getFilePathForId(fileId);
     Tag tag = m_id3Parser.getTag(filePath);
     if (tag.isValid())
         return tagToBytes(tag);
